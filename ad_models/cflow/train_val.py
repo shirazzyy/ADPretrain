@@ -10,7 +10,7 @@ from tqdm import tqdm
 #这不仅提高了用户体验，还便于开发者监控程序执行状态。
 from .model import load_decoder_arch, positionalencoding2d
 from .utils import *
-from .metrics import calculate_metrics
+from .metrics import calculate_metrics'''模型评估'''
 
 
 gamma = 0.0
