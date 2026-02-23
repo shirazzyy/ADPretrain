@@ -6,6 +6,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
+#进度条库，让程序在执行长时间任务时，如数据处理、模型训练等，提供实时的进度反馈
+#这不仅提高了用户体验，还便于开发者监控程序执行状态。
 from .model import load_decoder_arch, positionalencoding2d
 from .utils import *
 from .metrics import calculate_metrics
