@@ -1,16 +1,19 @@
 from typing import List
+#明确函数接口的预期输入输出类型
 import os
 import math
 import numpy as np
 from PIL import Image
+#图像处理库
 import torch
 from torch import Tensor
 import torch.nn.functional as F
 import torchvision.transforms as T
-
+#图像处理库
 
 np.random.seed(0)
 _GCONST_ = -0.9189385332046727 # ln(sqrt(2*pi))
+#设置随机数种子以确保结果可重现
 
 
 class Score_Observer:
@@ -35,25 +38,36 @@ class Score_Observer:
     def print_score(self):
         print('{:s}: \t last: {:.2f} \t max: {:.2f} \t epoch_max: {:d}'.format(
             self.name, self.last, self.max_score, self.max_epoch))
+        #1. 该类用于监控和记录分数变化，跟踪最大分数及其对应的训练轮次。
+        #2. 提供更新分数和打印分数信息的功能，支持自动保存权重的判断逻辑。
+        #3. 通过print_score方法格式化输出当前分数、最大分数和对应轮次信息。
+    
 
 
 def t2np(tensor):
     '''pytorch tensor -> numpy array'''
     return tensor.cpu().data.numpy() if tensor is not None else None
+    #1. 该函数能够处理GPU和CPU上的PyTorch张量转换
+    #2. 自动处理张量设备迁移，确保转换安全
+    #3. 使用detach()方法避免梯度计算，提高转换效率
+    #4. 支持任意维度的张量转换为numpy数组
 
 
 def get_logp(C, z, logdet_J):
     logp = C * _GCONST_ - 0.5*torch.sum(z**2, 1) + logdet_J
     return logp
-
+    #C: 条件向量 z: 变量 logdet_J: 雅可比行列式的对数
+    #返回:logp: 对数概率
+    #转对数概率避免梯度消失、保持概率分布的单调性，有利于优化过程。
 
 def rescale(x):
     return (x - x.min()) / (x.max() - x.min())
-
+    #将输入数据缩放到[0,1]区间
 
 RESULT_DIR = './cflow/results'
 WEIGHT_DIR = './cflow/weights'
 MODEL_DIR  = './cflow/models'
+#CFLOW模型的结果存储路径，分别用于保存测试结果、权重文件和模型文件
 
 def save_results(det_roc_obs, seg_roc_obs, seg_pro_obs, model_name, class_name, run_date):
     result = '{:.2f},{:.2f},{:.2f} \t\tfor {:s}/{:s}/{:s} at epoch {:d}/{:d}/{:d} for {:s}\n'.format(
@@ -65,7 +79,9 @@ def save_results(det_roc_obs, seg_roc_obs, seg_pro_obs, model_name, class_name, 
     fp = open(os.path.join(RESULT_DIR, '{}_{}.txt'.format(model_name, run_date)), "w")
     fp.write(result)
     fp.close()
-
+    #1. 该函数用于将检测、分割和PRO的ROC观察结果保存到文件中。
+    #2. 使用格式化字符串将结果组织成可读的格式。
+    #3. 将结果追加写入以日期命名的结果文件中。
 
 def save_weights(encoder, decoders, model_name, run_date):
     if not os.path.exists(WEIGHT_DIR):
