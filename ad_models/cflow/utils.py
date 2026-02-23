@@ -182,7 +182,16 @@ def get_residual_features(features: List[Tensor], ref_features: List[Tensor], po
         residual_features.append(ri)
     
     return residual_features
+    '''计算特征图之间的残差特征‌:函数的参数说明：
 
+    features: 目标特征列表，通常是输入图像的特征表示
+    ref_features: 参考特征列表，通常是目标特征的参考或基准表示
+    pos_flag: 布尔标志，控制是否使用位置信息进行特征计算
+    函数返回值是匹配后的参考特征列表，其核心功能包括：
+    
+    特征差值计算‌：通过计算目标特征与参考特征之间的差异，得到残差特征
+    维度一致性保持‌：确保输出特征与输入特征具有相同的维度结构
+    位置信息处理‌：当 pos_flag 为 True 时，可能还会考虑空间位置信息'''
 
 def get_random_normal_images(class_name, num_shot=1):
     if class_name in ['bottle', 'cable', 'capsule', 'carpet', 'grid',
@@ -203,6 +212,7 @@ def get_random_normal_images(class_name, num_shot=1):
         normal_paths.append(os.path.join(path, filenames[n_idx]))
     
     return normal_paths
+    '''少样本（few-shot）异常检测数据加载器。它从经典的 MVTec AD 和 VisA 工业缺陷检测数据集中随机抽取“正常”（Normal）样本作为参考图。'''
 
 
 def get_reference_features(encoder, class_names, device):
@@ -219,7 +229,7 @@ def get_reference_features(encoder, class_names, device):
             features[i] = features[i].reshape(len(class_names), -1, c)
         
     return features
-
+    '''为每个类别提取参考特征（Reference Features）'''
 
 def get_mc_matched_reference_features(features, class_names, ref_features):
     matched_ref_features = [[] for _ in range(len(features))]
@@ -242,6 +252,8 @@ def get_mc_matched_reference_features(features, class_names, ref_features):
     matched_ref_features = [torch.stack(item, dim=0) for item in matched_ref_features]
     
     return matched_ref_features
+    '''多尺度特征对齐（Feature Alignment）。它的核心逻辑是：对于待测图像的每一个特征点，从对应的“正常参考图”中寻找余弦相似度最高的特征，并用该特征进行替换（即最近邻搜索）。
+这种方法在 WinClip 或 SPADE 等异常检测算法中非常常见，目的是为待测图重建一张“虚拟的正常参考图”。'''
 
 
 def load_and_transform_vision_data(image_paths, device):
@@ -261,3 +273,4 @@ def load_and_transform_vision_data(image_paths, device):
         image = data_transform(image).to(device)
         image_ouputs.append(image)
     return torch.stack(image_ouputs, dim=0)
+    '''图像的预处理'''
