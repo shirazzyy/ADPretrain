@@ -92,7 +92,7 @@ def save_weights(encoder, decoders, model_name, run_date):
     path = os.path.join(WEIGHT_DIR, filename)
     torch.save(state, path)
     print('Saving weights to {}'.format(filename))
-
+    #定义保存权重参数的路径
 
 def load_weights(encoder, decoders, filename):
     path = os.path.join(filename)
@@ -100,7 +100,7 @@ def load_weights(encoder, decoders, filename):
     encoder.load_state_dict(state['encoder_state_dict'], strict=False)
     decoders = [decoder.load_state_dict(state, strict=False) for decoder, state in zip(decoders, state['decoder_state_dict'])]
     print('Loading weights from {}'.format(filename))
-    
+    #定义加载权重参数的函数
     
 def adjust_learning_rate(c, optimizer, epoch):
     lr = c['lr']
@@ -115,6 +115,11 @@ def adjust_learning_rate(c, optimizer, epoch):
 
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
+    #实现了两种学习率调整策略：余弦退火和阶梯式衰减
+    #余弦退火策略使学习率平滑下降，有助于模型收敛
+    #阶梯式衰减在特定轮次点降低学习率，适用于分阶段训练
+    #支持同时更新优化器中多个参数组的学习率
+    #返回调整后的学习率值，便于监控和记录
 
 
 def warmup_learning_rate(c, epoch, batch_id, total_batches, optimizer):
@@ -128,7 +133,15 @@ def warmup_learning_rate(c, epoch, batch_id, total_batches, optimizer):
     for param_group in optimizer.param_groups:
         lrate = param_group['lr']
     return lrate
-
+    #1. 该函数实现学习率预热机制，在训练初期逐步增加学习率
+    #2. 通过线性插值计算预热阶段的学习率值
+    #3. 支持多参数组优化器的统一学习率调整
+    #4. 预热完成后返回当前实际学习率值
+    #在 warmup_learning_rate 函数中，参数 c 是一个配置字典（configuration dictionary）：
+'''c['lr_warm']：布尔值，用于控制是否启用学习率预热机制
+c['lr_warm_epochs']：整数，预热阶段的训练轮次
+c['lr_warmup_from']：预热开始时的学习率值
+c['lr_warmup_to']：预热结束时的目标学习率值'''
 
 def get_matched_ref_features(features: List[Tensor], ref_features: List[Tensor]) -> List[Tensor]:
     """
@@ -139,6 +152,9 @@ def get_matched_ref_features(features: List[Tensor], ref_features: List[Tensor])
         feature = features[layer_id]
         B, C, H, W = feature.shape
         feature = feature.permute(0, 2, 3, 1).reshape(-1, C).contiguous()  # (N1, C)
+        '''将特征图从四维张量转换为二维张量:feature 原本的形状是 (B, C, H, W)，其中 B 是批次大小，C 是通道数，H 和 W 分别是高度和宽度。
+        通过 permute(0, 2, 3, 1) 操作，将维度顺序从 (B, C, H, W) 调整为 (B, H, W, C)，即把通道维度移到最后。接着使用 reshape(-1, C) 
+        将高度和宽度维度合并，同时保持通道维度不变，最终得到形状为 (N1, C) 的张量，其中 N1 = B × H × W。'''
         feature_n = F.normalize(feature, p=2, dim=1)
         coreset = ref_features[layer_id]  # (N2, C)
         coreset_n = F.normalize(coreset, p=2, dim=1)
@@ -150,6 +166,7 @@ def get_matched_ref_features(features: List[Tensor], ref_features: List[Tensor])
         matched_ref_features.append(index_feats)
     
     return matched_ref_features
+    #匹配参考特征与目标特征‌
 
 
 def get_residual_features(features: List[Tensor], ref_features: List[Tensor], pos_flag: bool = False) -> List[Tensor]:
