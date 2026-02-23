@@ -7,7 +7,7 @@ import FrEIA.modules as Fm
 #构建可逆神经网络
 
 
-def positionalencoding2d(D, H, W):#为输入特征图添加空间位置信息
+def positionalencoding2d(D, H, W):
     """
     :param D: dimension of the model
     :param H: H of the positions
@@ -27,7 +27,7 @@ def positionalencoding2d(D, H, W):#为输入特征图添加空间位置信息
     P[D::2,  :, :]  = torch.sin(pos_h * div_term).transpose(0, 1).unsqueeze(2).repeat(1, 1, W)
     P[D+1::2,:, :]  = torch.cos(pos_h * div_term).transpose(0, 1).unsqueeze(2).repeat(1, 1, W)
     return P
-
+    #为输入特征图添加空间位置信息，增强网络对输入数据空间结构的感知能力
 
 def subnet_fc(dims_in, dims_out):
     return nn.Sequential(nn.Linear(dims_in, 2*dims_in), nn.ReLU(), nn.Linear(2*dims_in, dims_out))
