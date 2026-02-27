@@ -16,7 +16,7 @@ from .metrics import calculate_metrics'''模型评估'''
 gamma = 0.0
 theta = torch.nn.Sigmoid()
 log_theta = torch.nn.LogSigmoid()
-
+'''执行标准概率预测和对数概率计算。'''
 
 def init_seeds(seed=0):
     random.seed(seed)
@@ -24,7 +24,7 @@ def init_seeds(seed=0):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    
+    '''随机种子初始化,确保在进行深度学习实验时结果的可重复性。'''
     
 def train_meta_epoch(c, epoch, loader, encoder, projectors, decoders, ref_features, optimizer, with_pretrained, N, class_name):
     P = c['condition_vec']
@@ -61,6 +61,7 @@ def train_meta_epoch(c, epoch, loader, encoder, projectors, decoders, ref_featur
                     features = rfeatures[-L:]
                 else:
                     features = features[-L:]
+            '''异常检测循环之定位小样本异常：通过 encoder 提取特征，并计算当前图像特征与参考特征（ref_features）之间的残差（Residuals）'''
             
             # train decoder
             for l in range(L):
